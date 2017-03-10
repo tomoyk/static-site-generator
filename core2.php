@@ -101,5 +101,5 @@ for($i=0; $i<count($pageInfo); $i++){
 
 ?>
 <hr>
-<p>Author: Tomoyuki Koyama, License: Public Domain, Latest-Update: 2017/03/09.</p>
+<p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/09.</p>
 </body></html>
