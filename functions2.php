@@ -47,23 +47,29 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
+  // 改行で分割して配列に代入
+  $content = explode("\n", $content);
+  
+  // 子ページタグに一致する条件
+  define('PATTERN_TAG', "/^\s*\[CHILD_LIST\][^\t]*$/");
+
   // タグ[xxxx]の置換
   foreach($content as &$tmp){
     // [CHILD_LIST]の置換
-    if( preg_match("/^\s*\[CHILD_LIST\][^\t]*$/", $tmp) ){
-      //echo "[CHILD]: $fpath\n<br>";
-      //preg_replace
-      //$pageInfoから探索する関数
+    if( preg_match(PATTERN_TAG, $tmp) ){
+      $list_html = "replaced"; // 置換後の内容(子ページ一覧)HTMLで出力
+      $new_content .= preg_replace(PATTERN_TAG, $list_html, $tmp);
+
+    // タグが存在しない時
+    }else{
+      $new_content .= $tmp;
     }
   }
+  $content = $new_content;
 
   // htmlテンプレートの読み込み
   require('template.php');
   
-  // プレビューの出力(CSSが適用されてしまうのでコメントアウト)
-  //dbg_msg(2, "preview", "ファイル $fname は以下で書き込まれます.");
-  //if(DEBUG==1) echo "\n<div class=\"pageContent\">$file_content</div>\n";
-
   // htmlを返す
   return $file_content;
 }

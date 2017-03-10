@@ -1,7 +1,7 @@
 <?php
 
 // デバッグ設定(0:OFF, 1:ON)
-define('DEBUG', 0);
+define('DEBUG', 1);
 
 // 上書き設定(0:NO, 1:YES)
 define('OVER_WRITE', 1);
