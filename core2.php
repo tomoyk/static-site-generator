@@ -1,0 +1,105 @@
+<?php
+
+// デバッグ設定(0:OFF, 1:ON)
+define('DEBUG', 0);
+
+// 上書き設定(0:NO, 1:YES)
+define('OVER_WRITE', 1);
+
+// ソースデータ(.txt)の保存場所
+define('DATA_PATH', 'src');
+/* [MEMO]
+core.phpやfunctions.php, template.phpが設置されているディレクトリを基準に
+サイトのソースデータ(.txt)が保存されているディレクトリ名を指定してください.
+同一ディレクトリの場合は「.」を設定,子ディレクトリの場合はその名前を設定してください.
+*/
+
+// 生成したサイトの保存場所
+define('OUT_PATH', 'out');
+/* [MEMO]
+生成したサイト(.html)の出力先のディレクトリを指定してください.
+core.phpやfunctions.php, template.phpが設置されているディレクトリを基準に
+同一ディレクトリの場合は「空白」（スペースではありません）で設定,
+子ディレクトリの場合はその名前を設定してください.
+*/
+
+// ディレクトリが存在しない時に作成するディレクトリの権限
+define('PERMISSION', 0755);
+/* [MEMO]
+一般的なWebサーバの場合,パーミッションは0755に設定することが多いです.
+0700に設定してapacheの実行ユーザのみ読み書きを許可するほうがより安全です.
+*/
+
+?>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>サイト生成</title>
+<style>
+#gen, #find{
+  display: block;
+  background: #98fb98;
+  padding: 5px 10px;
+}
+.pageContent{
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  overflow: auto;
+  border: solid 1px black;
+  margin: 20px 0;
+}
+span.red{
+  color: #de0000;
+  font-weight: bold;
+}
+span.black{
+  color: #000;
+}
+span.blue{
+  color: #00008b;
+}
+.marginTop{
+  margin-top: 100px;
+}
+</style>
+</head><body>
+<h1>#サイト生成</h1>
+<a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a>
+<h2 id="find">$ファイル(.txt)の探索</h2>
+<?php
+
+// 別ファイル読み込み
+require_once("functions2.php");
+
+// 変数の初期化
+$flag = false;
+$counter = 0; // 一致したファイルの数
+$pageInfo = array();
+
+// 検索の実行
+$result = search(DATA_PATH);
+dbg_msg(0, "info", $result);
+
+?>
+<hr class="marginTop">
+<p><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a></p>
+<h2 id="gen">$ファイル(.html)の出力</h2>
+<?php
+
+// htmlの生成
+for($i=0; $i<count($pageInfo); $i++){
+  // htmlの組み立て
+  $write_content = make_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $pageInfo[$i]['Title'], $pageInfo[$i]['Date'], $pageInfo[$i]['Author'], $pageInfo[$i]['Content']);
+  dbg_msg(2, "call", "make_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, {$pageInfo[$i]['Title']}, {$pageInfo[$i]['Date']}, {$pageInfo[$i]['Author']}, \$pageInfo[$i]['Content'])"); // Content展開すると大変だから展開しない
+  
+  // htmlの書き込み
+  write_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $write_content);
+  dbg_msg(2, "call", "write_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, \$write_content)"); // Content展開すると大変だから展開しない
+}
+
+?>
+<hr>
+<p>Author: Tomoyuki Koyama, License: Public Domain, Latest-Update: 2017/03/09.</p>
+</body></html>
