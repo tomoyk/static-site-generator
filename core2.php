@@ -1,7 +1,7 @@
 <?php
 
 // デバッグ設定(0:OFF, 1:ON)
-define('DEBUG', 1);
+define('DEBUG', 0);
 
 // 上書き設定(0:NO, 1:YES)
 define('OVER_WRITE', 1);
@@ -28,6 +28,13 @@ define('PERMISSION', 0755);
 /* [MEMO]
 一般的なWebサーバの場合,パーミッションは0755に設定することが多いです.
 0700に設定してapacheの実行ユーザのみ読み書きを許可するほうがより安全です.
+*/
+
+// 公開サイトの配置ディレクトリ設定
+define('DOCUMENT_ROOT', 'ts/static-site-generator/out/');
+/* [MEMO]
+http://example.com/に配置する場合は「空白」（スペースではありません）を指定してください.
+http://example.com/hoge/に配置する場合は「hoge/」と指定してください.
 */
 
 ?>

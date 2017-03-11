@@ -47,6 +47,7 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
+  global $pageInfo;
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
   
@@ -55,9 +56,33 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
   // タグ[xxxx]の置換
   foreach($content as &$tmp){
-    // [CHILD_LIST]の置換
+    // [CHILD_LIST]が存在する時
     if( preg_match(PATTERN_TAG, $tmp) ){
-      $list_html = "replaced"; // 置換後の内容(子ページ一覧)HTMLで出力
+      $list_html = "<ul>\n";
+
+      // pageInfoの中を探索
+      for($i=0;$i<count($pageInfo);$i++){
+        // echo "$fpath == {$pageInfo[$i]['Path']} , $fname == {$pageInfo[$i]['Name']}\n<br>";
+        
+        // ファイル名がindex.txtかつ子ディレクトリ または
+        // ディレクトリ名（パス）が同一かつファイル名が同一でない
+        if( ($pageInfo[$i]['Name']=="index.txt" && preg_match("#^".$fpath."[^\/\s]+/#", $pageInfo[$i]['Path']))
+          ||($fpath==$pageInfo[$i]['Path'] && $fname!=$pageInfo[$i]['Name']) ){
+          // echo "一致しました.\n<br>"
+
+          // ソースのパスを書き込むパスに変更
+          $new_fpath = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+
+          // txtをhtmlに変換
+          $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
+
+          // リストhtmlを組み立て
+          $list_html .= "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
+        }
+      }
+      $list_html .= "</ul>\n";
+
+      // [CHILD_LIST]を置換
       $new_content .= preg_replace(PATTERN_TAG, $list_html, $tmp);
 
     // タグが存在しない時
