@@ -47,7 +47,8 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo;
+  global $pageInfo,$navigation;
+
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
   
@@ -58,38 +59,9 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   foreach($content as &$tmp){
     // [CHILD_LIST]が存在する時
     if( preg_match(PATTERN_TAG, $tmp) ){
-      $list_html = "<ul>\n";
-
-      // pageInfoの中を探索
-      for($i=0;$i<count($pageInfo);$i++){
-        // echo "$fpath == {$pageInfo[$i]['Path']} , $fname == {$pageInfo[$i]['Name']}\n<br>";
-        
-        // ファイル名がindex.txtかつ子ディレクトリ または
-        // ディレクトリ名（パス）が同一かつファイル名が同一でない
-        if( ($pageInfo[$i]['Name']=="index.txt" && preg_match("#^".$fpath."[^\/\s]+/#", $pageInfo[$i]['Path']))
-          ||($fpath==$pageInfo[$i]['Path'] && $fname!=$pageInfo[$i]['Name']) ){
-          // echo "一致しました.\n<br>"
-
-          // ソースのパスを書き込むパスに変更
-          $new_fpath = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
-
-          // txtをhtmlに変換
-          $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
-
-          // リストhtmlを組み立て
-          $list_html .= "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
-        }
-      }
-      $list_html .= "</ul>\n";
-
-      // 最初だけナビゲーションとして設定
-      //$navigation = $list_html;
-
       // [CHILD_LIST]を置換
-      $new_content .= preg_replace(PATTERN_TAG, $list_html, $tmp);
-
-      // [[最終形]]
-      // $new_content = getChildList();
+      $result = make_childList($fpath, $fname);
+      $new_content .= preg_replace(PATTERN_TAG, $result, $tmp);
 
     // タグが存在しない時
     }else{
@@ -135,6 +107,7 @@ function write_html($fpath, $fname, $html){
     // ディレクトリが存在しない
     }else{
       dbg_msg(0, "info", "$new_fname を書き込むディレクトリ $new_fpath がありません.");
+
       // ディレクトリ作成に成功
       if( mkdir($new_fpath, PERMISSION, true) ){
 
@@ -179,7 +152,6 @@ function setInfo($fpath, $fname, $number){
   
   // ファイルの内容を1行ずつ読み込んでMETAの内容を取得
   foreach($read as &$tmp){
-
     // METAの開始&終了の判定
     if( preg_match("/^\s*\[META\]\s*$/", $tmp) ){
       $state=1;
@@ -224,6 +196,40 @@ function setInfo($fpath, $fname, $number){
     dbg_msg(2, "info", "\$pageInfo[$number][Path] == $fpath");
     dbg_msg(2, "info", "\$pageInfo[$number][Name] == $fname");
   }
+}
+
+/* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
+function make_childList($filePath, $fileName){
+  global $pageInfo,$navigation;
+  $list_html = "<ul>\n";
+  
+  // pageInfoの中を探索
+  for($i=0;$i<count($pageInfo);$i++){
+    // echo "$fpath ==? {$pageInfo[$i]['Path']} , $fname ==? {$pageInfo[$i]['Name']}\n<br>";
+  
+    // ファイル名がindex.txtかつ子ディレクトリ または
+    // ディレクトリ名（パス）が同一かつファイル名が同一でない
+    if( ($pageInfo[$i]['Name']=="index.txt" && preg_match("#^".$filePath."[^\/\s]+/#", $pageInfo[$i]['Path']))
+      ||($filePath==$pageInfo[$i]['Path'] && $fileName!=$pageInfo[$i]['Name']) ){
+
+      dbg_msg(2, "info", "次の条件で一致しました. $fpath ==? {$pageInfo[$i]['Path']} , $fname ==? {$pageInfo[$i]['Name']}");
+
+      // ソースのパスを書き込むパスに変更
+      $new_fpath = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+
+      // txtをhtmlに変換
+      $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
+
+      // リストhtmlを組み立て
+      $list_html .= "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
+    }
+  }
+  $list_html .= "</ul>\n";
+
+  // 最初だけナビゲーションとして設定
+  if(!isset($navigation)) $navigation = $list_html;
+
+  return $list_html;
 }
 
 /* ************************* デバッグメッセージ関数 ************************* */

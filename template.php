@@ -12,6 +12,9 @@ $file_content = <<<EOF
 <body>
 <div id="container">
   <h1>サイトタイトル22</h1>
+  <nav>
+{$navigation}
+  </nav>
   <h2>{$title}</h2>
   <dl>
     <dt>日付</dt>
