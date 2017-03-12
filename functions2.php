@@ -47,13 +47,16 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo,$navigation;
+  global $pageInfo, $navi, $sub_navi;
 
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
   
   // 子ページタグに一致する条件
   define('PATTERN_TAG', "/^\s*\[CHILD_LIST\][^\t]*$/");
+
+  // サブナビの出力
+  $sub_navi = make_childList($fpath, 'index.txt');
 
   // タグ[xxxx]の置換
   foreach($content as &$tmp){
@@ -200,8 +203,8 @@ function setInfo($fpath, $fname, $number){
 
 /* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
 function make_childList($filePath, $fileName){
-  global $pageInfo,$navigation;
-  $list_html = "<ul>\n";
+  global $pageInfo,$navi;
+  $list_html = "\n<ul>\n";
   
   // pageInfoの中を探索
   for($i=0;$i<count($pageInfo);$i++){
@@ -221,13 +224,13 @@ function make_childList($filePath, $fileName){
       $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
 
       // リストhtmlを組み立て
-      $list_html .= "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
+      $list_html .= "<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
     }
   }
   $list_html .= "</ul>\n";
 
   // 最初だけナビゲーションとして設定
-  if(!isset($navigation)) $navigation = $list_html;
+  if(!isset($navi)) $navi = $list_html;
 
   return $list_html;
 }
