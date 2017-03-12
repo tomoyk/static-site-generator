@@ -82,8 +82,14 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
       }
       $list_html .= "</ul>\n";
 
+      // 最初だけナビゲーションとして設定
+      //$navigation = $list_html;
+
       // [CHILD_LIST]を置換
       $new_content .= preg_replace(PATTERN_TAG, $list_html, $tmp);
+
+      // [[最終形]]
+      // $new_content = getChildList();
 
     // タグが存在しない時
     }else{
