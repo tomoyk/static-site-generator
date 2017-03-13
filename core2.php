@@ -44,18 +44,36 @@ http://example.com/hoge/に配置する場合は「hoge/」と指定してくだ
 <meta charset="UTF-8">
 <title>サイト生成</title>
 <style>
-#gen, #find{
+html{
+  background: #e6e6fa;
+}
+div.menu {
+  position: fixed;
   display: block;
-  background: #98fb98;
+  top: 0;
+  right: 0;
+  margin: 10px 0;
+  background: #ffb6c1;
+  border: solid 1px #db7093;
+  padding: 10px 15px;
+  z-index: 20;
+}
+div.menu > a{
+  color: #000;
+}
+h2#gen, h2#find{
+  display: block;
+  background: #6495ed;
   padding: 5px 10px;
 }
-.pageContent{
+iframe.pageContent{
   width: 100%;
   height: 200px;
   overflow: hidden;
   overflow: auto;
   border: solid 1px black;
   margin: 20px 0;
+  background: #fff;
 }
 span.red{
   color: #de0000;
@@ -73,7 +91,7 @@ span.blue{
 </style>
 </head><body>
 <h1>#サイト生成</h1>
-<a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a>
+<div class="menu"><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a></div>
 <h2 id="find">$ファイル(.txt)の探索</h2>
 <?php
 

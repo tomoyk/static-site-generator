@@ -57,7 +57,8 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
   // サブナビの出力
   $sub_navi = make_childList($fpath, 'index.txt');
-
+  $sub_navi = ($fname=='index.txt' ? '' : $sub_navi);
+  
   // タグ[xxxx]の置換
   foreach($content as &$tmp){
     // [CHILD_LIST]が存在する時
@@ -68,7 +69,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
     // タグが存在しない時
     }else{
-      $new_content .= $tmp;
+      $new_content .= "$tmp\n";
     }
   }
   $content = $new_content;
