@@ -47,7 +47,7 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo, $navi, $sub_navi;
+  global $pageInfo, $navi, $sub_navi, $uri_top;
 
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
@@ -64,7 +64,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
     // [CHILD_LIST]が存在する時
     if( preg_match(PATTERN_TAG, $tmp) ){
       // [CHILD_LIST]を置換
-      $result = make_childList($fpath, $fname);
+      $result = make_childList($fpath, $fname, 1);
       $new_content .= preg_replace(PATTERN_TAG, $result, $tmp);
 
     // タグが存在しない時
@@ -203,9 +203,9 @@ function setInfo($fpath, $fname, $number){
 }
 
 /* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
-function make_childList($filePath, $fileName){
+function make_childList($filePath, $fileName, $echoContent){
   global $pageInfo,$navi;
-  $list_html = "\n<ul>\n";
+  $list_html = "\n<ul>";
   
   // pageInfoの中を探索
   for($i=0;$i<count($pageInfo);$i++){
@@ -225,7 +225,18 @@ function make_childList($filePath, $fileName){
       $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
 
       // リストhtmlを組み立て
-      $list_html .= "<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."</a></li>\n";
+      if($echoContent==1){
+        // スペース,タブ,改行を削除
+        $remove_spaceIndent = preg_replace("/\s+/", '', $pageInfo[$i]['Content']);
+
+        // htmlタグを削除
+        $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>)/", '', $remove_spaceIndent);
+        $remove_htmlTag = strip_tags($remove_specialTag);
+
+        // 最初の50文字を抽出
+        $description = "<div>".mb_strcut($remove_htmlTag, 0, 140, 'UTF-8')."...</div>\n";
+      }
+      $list_html .= "<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."\n$description</a></li>";
     }
   }
   $list_html .= "</ul>\n";

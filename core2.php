@@ -102,6 +102,7 @@ require_once("functions2.php");
 $flag = false;
 $counter = 0; // 一致したファイルの数
 $pageInfo = array();
+$uri_top = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
 
 // 検索の実行
 $result = search(DATA_PATH);
