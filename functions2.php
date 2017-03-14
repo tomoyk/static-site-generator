@@ -65,7 +65,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
     // パスが一致している時
     if(DATA_PATH."/$key"==$fpath){
       // ナビゲーションの要素にサブナビを挿入（置換）
-      $navi2.=preg_replace("#</a></li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
+      $navi2.=preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
     }else{
       $navi2.=$naviList[$key];
     }
@@ -248,14 +248,10 @@ function make_childList($filePath, $fileName, $mode){
 
         // 最初の50文字を抽出
         $description = "\n<div>".mb_strcut($remove_htmlTag, 0, 140, 'UTF-8')."...</div>\n";
-
-        $echoTitle = "<span>{$pageInfo[$i]['Title']}</span>";
-      }else{
-        $echoTitle = $pageInfo[$i]['Title'];
       }
 
       // htmlの組み立て
-      $handle = "<li>\n<a href=\"$new_fpath$new_fname\">".$echoTitle."$description</a>\n</li>";
+      $handle = "<li>\n<a href=\"$new_fpath$new_fname\"><span>{$pageInfo[$i]['Title']}</span>$description</a>\n</li>";
       $list_html .= $handle;
       
       // nav2(展開式ナビゲーション)用のナビゲーションアイテムリストを作成
