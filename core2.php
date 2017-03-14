@@ -122,7 +122,7 @@ dbg_msg(0, "info", $result);
 <?php
 
 // Navigationの取得
-$navinavi = array();
+$naviList = array();
 make_childList(DATA_PATH.'/', 'index.txt', 'Navi');
 
 // htmlの生成
@@ -136,8 +136,7 @@ for($i=0; $i<count($pageInfo); $i++){
   dbg_msg(2, "call", "write_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, \$write_content)"); // Content展開すると大変だから展開しない
 }
 
-var_dump($navinavi);
 ?>
 <hr>
-<p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/09.</p>
+<p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/14.</p>
 </body></html>

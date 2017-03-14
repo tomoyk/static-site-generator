@@ -47,7 +47,7 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo, $navi, $sub_navi, $uri_top, $navinavi;
+  global $pageInfo, $navi, $sub_navi, $uri_top, $naviList;
 
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
@@ -61,13 +61,13 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
   // 展開形ナビゲーションの取得
   $navi2="\n<ul class=\"childList mainNav\">";
-  foreach($navinavi as $key => $value){
+  foreach($naviList as $key => $value){
     // パスが一致している時
     if(DATA_PATH."/$key"==$fpath){
       // ナビゲーションの要素にサブナビを挿入（置換）
-      $navi2.=preg_replace("#</a></li>$#", "</a>$getSubNavi</li>", $navinavi[$key]);
+      $navi2.=preg_replace("#</a></li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
     }else{
-      $navi2.=$navinavi[$key];
+      $navi2.=$naviList[$key];
     }
   }
   $navi2.="\n</ul>\n";
@@ -217,7 +217,7 @@ function setInfo($fpath, $fname, $number){
 
 /* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
 function make_childList($filePath, $fileName, $mode){
-  global $pageInfo,$navi,$navinavi;
+  global $pageInfo,$navi,$naviList;
   $list_html = "\n<ul class=\"childList\">";
 
   // pageInfoの中を探索
@@ -247,24 +247,28 @@ function make_childList($filePath, $fileName, $mode){
         $remove_htmlTag = strip_tags($remove_specialTag);
 
         // 最初の50文字を抽出
-        $description = "<div>".mb_strcut($remove_htmlTag, 0, 140, 'UTF-8')."...</div>\n";
-      }
-      
-      // htmlの組み立て:
-      $handle = "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."\n$description</a></li>";
-      $list_html .= $handle;
+        $description = "\n<div>".mb_strcut($remove_htmlTag, 0, 140, 'UTF-8')."...</div>\n";
 
+        $echoTitle = "<span>{$pageInfo[$i]['Title']}</span>";
+      }else{
+        $echoTitle = $pageInfo[$i]['Title'];
+      }
+
+      // htmlの組み立て
+      $handle = "<li>\n<a href=\"$new_fpath$new_fname\">".$echoTitle."$description</a>\n</li>";
+      $list_html .= $handle;
+      
+      // nav2(展開式ナビゲーション)用のナビゲーションアイテムリストを作成
       if($mode=='Navi'){
-        $name=preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
-        $navinavi[$name]=$handle;
-        //var_dump($navinavi);
+        $label=preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+        $naviList[$label]=$handle;
       }
     }
   }
   $list_html .= "\n</ul>\n";
 
   // 最初だけナビゲーションとして設定
-  if( !isset($navi) && $mode!='Navi' ){
+  if( !isset($navi) ){
     $navi = $list_html;
   }
 
