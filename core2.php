@@ -17,10 +17,17 @@ core.phpやfunctions.php, template.phpが設置されているディレクトリ
 // 生成したサイトの保存場所
 define('OUT_PATH', 'out');
 /* [MEMO]
-生成したサイト(.html)の出力先のディレクトリを指定してください.
+生成したサイト(html)の出力先のディレクトリを指定してください.
 core.phpやfunctions.php, template.phpが設置されているディレクトリを基準に
 同一ディレクトリの場合は「空白」（スペースではありません）で設定,
 子ディレクトリの場合はその名前を設定してください.
+*/
+
+// 出力するファイルの拡張子
+define('OUT_EXTENSION', 'php');
+/* [MEMO]
+出力するファイルの拡張子を指定してください.通常はhtmlで問題ありません.
+指定する際に.(ドット)は不要です.
 */
 
 // ディレクトリが存在しない時に作成するディレクトリの権限
@@ -91,7 +98,7 @@ span.blue{
 </style>
 </head><body>
 <h1>#サイト生成</h1>
-<div class="menu"><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a></div>
+<div class="menu"><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(html)の出力]</a></div>
 <h2 id="find">$ファイル(.txt)の探索</h2>
 <?php
 
@@ -110,21 +117,26 @@ dbg_msg(0, "info", $result);
 
 ?>
 <hr class="marginTop">
-<p><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(.html)の出力]</a></p>
-<h2 id="gen">$ファイル(.html)の出力</h2>
+<p><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(html)の出力]</a></p>
+<h2 id="gen">$ファイル(html)の出力</h2>
 <?php
+
+// Navigationの取得
+$navinavi = array();
+make_childList(DATA_PATH.'/', 'index.txt', 'Navi');
 
 // htmlの生成
 for($i=0; $i<count($pageInfo); $i++){
   // htmlの組み立て
   $write_content = make_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $pageInfo[$i]['Title'], $pageInfo[$i]['Date'], $pageInfo[$i]['Author'], $pageInfo[$i]['Content']);
   dbg_msg(2, "call", "make_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, {$pageInfo[$i]['Title']}, {$pageInfo[$i]['Date']}, {$pageInfo[$i]['Author']}, \$pageInfo[$i]['Content'])"); // Content展開すると大変だから展開しない
-  
+
   // htmlの書き込み
   write_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $write_content);
   dbg_msg(2, "call", "write_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, \$write_content)"); // Content展開すると大変だから展開しない
 }
 
+var_dump($navinavi);
 ?>
 <hr>
 <p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/09.</p>

@@ -47,7 +47,7 @@ function search($target_path){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo, $navi, $sub_navi, $uri_top;
+  global $pageInfo, $navi, $sub_navi, $uri_top, $navinavi;
 
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
@@ -55,16 +55,29 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   // 子ページタグに一致する条件
   define('PATTERN_TAG', "/^\s*\[CHILD_LIST\][^\t]*$/");
 
-  // サブナビの出力
-  $sub_navi = make_childList($fpath, 'index.txt');
-  $sub_navi = ($fname=='index.txt' ? '' : $sub_navi);
-  
+  // サブナビの取得
+  $getSubNavi = make_childList($fpath, 'index.txt');
+  $sub_navi = ($fname=='index.txt' ? '' : $getSubNavi);
+
+  // 展開形ナビゲーションの取得
+  $navi2="\n<ul class=\"childList mainNav\">";
+  foreach($navinavi as $key => $value){
+    // パスが一致している時
+    if(DATA_PATH."/$key"==$fpath){
+      // ナビゲーションの要素にサブナビを挿入（置換）
+      $navi2.=preg_replace("#</a></li>$#", "</a>$getSubNavi</li>", $navinavi[$key]);
+    }else{
+      $navi2.=$navinavi[$key];
+    }
+  }
+  $navi2.="\n</ul>\n";
+
   // タグ[xxxx]の置換
   foreach($content as &$tmp){
     // [CHILD_LIST]が存在する時
     if( preg_match(PATTERN_TAG, $tmp) ){
       // [CHILD_LIST]を置換
-      $result = make_childList($fpath, $fname, 1);
+      $result = make_childList($fpath, $fname, 'echoContent');
       $new_content .= preg_replace(PATTERN_TAG, $result, $tmp);
 
     // タグが存在しない時
@@ -94,8 +107,8 @@ function write_html($fpath, $fname, $html){
   $new_fpath = preg_replace("#^".DATA_PATH."/#", $out_path, $fpath);
   $new_fpath = ($new_fpath=='' ? './' : $new_fpath);
 
-  // 拡張子の変更(txt -> html)
-  $new_fname = preg_replace("/.txt$/", '.html', $fname);
+  // 拡張子の変更(txt -> ?)
+  $new_fname = preg_replace("/.txt$/", '.'.OUT_EXTENSION, $fname);
   dbg_msg(0, "write", "$new_fname を $new_fpath へ書き込む準備が完了しました.");
 
   // 重複するファイル,ディレクトリのチェック
@@ -203,46 +216,57 @@ function setInfo($fpath, $fname, $number){
 }
 
 /* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
-function make_childList($filePath, $fileName, $echoContent){
-  global $pageInfo,$navi;
-  $list_html = "\n<ul>";
-  
+function make_childList($filePath, $fileName, $mode){
+  global $pageInfo,$navi,$navinavi;
+  $list_html = "\n<ul class=\"childList\">";
+
   // pageInfoの中を探索
   for($i=0;$i<count($pageInfo);$i++){
-    // echo "$fpath ==? {$pageInfo[$i]['Path']} , $fname ==? {$pageInfo[$i]['Name']}\n<br>";
+    // echo "$filePath ==? {$pageInfo[$i]['Path']} , $fileName ==? {$pageInfo[$i]['Name']}\n<br>";
   
     // ファイル名がindex.txtかつ子ディレクトリ または
     // ディレクトリ名（パス）が同一かつファイル名が同一でない
     if( ($pageInfo[$i]['Name']=="index.txt" && preg_match("#^".$filePath."[^\/\s]+/#", $pageInfo[$i]['Path']))
       ||($filePath==$pageInfo[$i]['Path'] && $fileName!=$pageInfo[$i]['Name']) ){
 
-      dbg_msg(2, "info", "次の条件で一致しました. $fpath ==? {$pageInfo[$i]['Path']} , $fname ==? {$pageInfo[$i]['Name']}");
+      dbg_msg(2, "info", "次の条件で一致しました. $filePath ==? {$pageInfo[$i]['Path']} , $fileName ==? {$pageInfo[$i]['Name']}");
 
       // ソースのパスを書き込むパスに変更
       $new_fpath = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
 
       // txtをhtmlに変換
-      $new_fname = preg_replace("/.txt$/", '.html', $pageInfo[$i]['Name']);
+      $new_fname = preg_replace("/.txt$/", '.'.OUT_EXTENSION, $pageInfo[$i]['Name']);
 
-      // リストhtmlを組み立て
-      if($echoContent==1){
+      // [CHILD_LIST]の時(記事の抜粋を出力)
+      if($mode=="echoContent"){
         // スペース,タブ,改行を削除
         $remove_spaceIndent = preg_replace("/\s+/", '', $pageInfo[$i]['Content']);
 
-        // htmlタグを削除
+        // scriptタグとstyleタグを削除
         $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>)/", '', $remove_spaceIndent);
         $remove_htmlTag = strip_tags($remove_specialTag);
 
         // 最初の50文字を抽出
         $description = "<div>".mb_strcut($remove_htmlTag, 0, 140, 'UTF-8')."...</div>\n";
       }
-      $list_html .= "<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."\n$description</a></li>";
+      
+      // htmlの組み立て:
+      $handle = "\n<li><a href=\"$new_fpath$new_fname\">".$pageInfo[$i]['Title']."\n$description</a></li>";
+      $list_html .= $handle;
+
+      if($mode=='Navi'){
+        $name=preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+        $navinavi[$name]=$handle;
+        //var_dump($navinavi);
+      }
     }
   }
-  $list_html .= "</ul>\n";
+  $list_html .= "\n</ul>\n";
 
   // 最初だけナビゲーションとして設定
-  if(!isset($navi)) $navi = $list_html;
+  if( !isset($navi) && $mode!='Navi' ){
+    $navi = $list_html;
+  }
 
   return $list_html;
 }
