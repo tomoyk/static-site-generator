@@ -62,7 +62,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   // 展開形ナビゲーションの取得
   $navi2="\n<ul class=\"childList mainNav\">";
   foreach($naviList as $key => $value){
-    // パスが一致している時
+    // パスが一致 かつ ファイル名index.txtでない かつ ルートでない
     if(DATA_PATH."/$key"==$fpath){
       // ナビゲーションの要素にサブナビを挿入（置換）
       $navi2.=preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
@@ -257,6 +257,7 @@ function make_childList($filePath, $fileName, $mode){
       // nav2(展開式ナビゲーション)用のナビゲーションアイテムリストを作成
       if($mode=='Navi'){
         $label=preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+        $label=($label=='' ? $pageInfo[$i]['Name'] : $label);
         $naviList[$label]=$handle;
       }
     }
