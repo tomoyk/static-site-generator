@@ -52,9 +52,6 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
   
-  // 子ページタグに一致する条件
-  define('PATTERN_TAG', "/^\s*\[CHILD_LIST\][^\t]*$/");
-
   // サブナビの取得
   $getSubNavi = make_childList($fpath, 'index.txt');
   $sub_navi = ($fname=='index.txt' ? '' : $getSubNavi);
@@ -72,16 +69,32 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   }
   $navi2.="\n</ul>\n";
 
+  // タグの一覧
+  $checkTags = array('CHILD_LIST', 'SITEMAP', 'UPDATE_LIST');
+
   // タグ[xxxx]の置換
+  // contentから1行ずつ読み出す
   foreach($content as &$tmp){
-    // [CHILD_LIST]が存在する時
-    if( preg_match(PATTERN_TAG, $tmp) ){
-      // [CHILD_LIST]を置換
-      $result = make_childList($fpath, $fname, 'echoContent');
-      $new_content .= preg_replace(PATTERN_TAG, $result, $tmp);
+    $tagState = 0;
+
+    // タグ一覧から1つずつ照合
+    foreach($checkTags as &$foo){
+      $ptn = "/^\s*\[".$foo."\][^\t]*$/";
+      // [xxxx]が存在する時
+      if( preg_match($ptn, $tmp) ){
+        $tagState = 1;
+        // 一致したタグの場合分け
+        if($foo=='CHILD_LIST'){
+          $child_list = make_childList($fpath, $fname, 'echoContent');
+          $new_content .= preg_replace($ptn, $child_list, $tmp);
+        }
+        //else{}
+        // 書く予定 switchで
+      }
+    }
 
     // タグが存在しない時
-    }else{
+    if($tagState==0){
       $new_content .= "$tmp\n";
     }
   }
