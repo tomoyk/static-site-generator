@@ -84,12 +84,26 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
       if( preg_match($ptn, $tmp) ){
         $tagState = 1;
         // 一致したタグの場合分け
+        switch($foo){
+          case "CHILD_LIST":
+            $after = make_childList($fpath, $fname, 'echoContent');
+            break;
+          case "SITEMAP":
+            $after = "REPLACED[1]";
+            break;
+          case "UPDATE_LIST":
+            $after = "REPLACED[2]";
+            break;
+        }
+        // 置換
+        $new_content .= preg_replace($ptn, $after, $tmp);
+
+/*
         if($foo=='CHILD_LIST'){
           $child_list = make_childList($fpath, $fname, 'echoContent');
           $new_content .= preg_replace($ptn, $child_list, $tmp);
         }
-        //else{}
-        // 書く予定 switchで
+*/
       }
     }
 
@@ -256,7 +270,7 @@ function make_childList($filePath, $fileName, $mode){
         $remove_spaceIndent = preg_replace("/\s+/", '', $pageInfo[$i]['Content']);
 
         // scriptタグとstyleタグを削除
-        $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>)/", '', $remove_spaceIndent);
+        $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>|\[[A-Z_]*\])/", '', $remove_spaceIndent);
         $remove_htmlTag = strip_tags($remove_specialTag);
 
         // 最初の50文字を抽出
