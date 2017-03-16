@@ -44,6 +44,9 @@ http://example.com/に配置する場合は「空白」（スペースではあ�
 http://example.com/hoge/に配置する場合は「hoge/」と指定してください.
 */
 
+// 新着情報の表示件数
+define('PRINT_UPDATE_POST', 10);
+
 ?>
 <!doctype html>
 <html lang="ja">
@@ -135,6 +138,8 @@ for($i=0; $i<count($pageInfo); $i++){
   write_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $write_content);
   dbg_msg(2, "call", "write_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, \$write_content)"); // Content展開すると大変だから展開しない
 }
+
+// ここになにか書いてデバッグしてた.
 
 ?>
 <hr>

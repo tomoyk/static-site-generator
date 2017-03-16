@@ -45,139 +45,6 @@ function search($target_path){
   }
 }
 
-/* ************************* 書き込むコンテンツを組み立て ************************* */
-function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo, $navi, $sub_navi, $uri_top, $naviList;
-
-  // 改行で分割して配列に代入
-  $content = explode("\n", $content);
-  
-  // サブナビの取得
-  $getSubNavi = make_childList($fpath, 'index.txt');
-  $sub_navi = ($fname=='index.txt' ? '' : $getSubNavi);
-
-  // 展開形ナビゲーションの取得
-  $navi2="\n<ul class=\"childList mainNav\">";
-  foreach($naviList as $key => $value){
-    // パスが一致 かつ ファイル名index.txtでない かつ ルートでない
-    if(DATA_PATH."/$key"==$fpath){
-      // ナビゲーションの要素にサブナビを挿入（置換）
-      $navi2.=preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
-    }else{
-      $navi2.=$naviList[$key];
-    }
-  }
-  $navi2.="\n</ul>\n";
-
-  // タグの一覧
-  $checkTags = array('CHILD_LIST', 'SITEMAP', 'UPDATE_LIST');
-
-  // タグ[xxxx]の置換
-  // contentから1行ずつ読み出す
-  foreach($content as &$tmp){
-    $tagState = 0;
-
-    // タグ一覧から1つずつ照合
-    foreach($checkTags as &$foo){
-      $ptn = "/^\s*\[".$foo."\][^\t]*$/";
-      // [xxxx]が存在する時
-      if( preg_match($ptn, $tmp) ){
-        $tagState = 1;
-        // 一致したタグの場合分け
-        switch($foo){
-          case "CHILD_LIST":
-            $after = make_childList($fpath, $fname, 'echoContent');
-            break;
-          case "SITEMAP":
-            $after = "REPLACED[1]";
-            break;
-          case "UPDATE_LIST":
-            $after = "REPLACED[2]";
-            break;
-        }
-        // 置換
-        $new_content .= preg_replace($ptn, $after, $tmp);
-
-/*
-        if($foo=='CHILD_LIST'){
-          $child_list = make_childList($fpath, $fname, 'echoContent');
-          $new_content .= preg_replace($ptn, $child_list, $tmp);
-        }
-*/
-      }
-    }
-
-    // タグが存在しない時
-    if($tagState==0){
-      $new_content .= "$tmp\n";
-    }
-  }
-  $content = $new_content;
-
-  // htmlテンプレートの読み込み
-  require('template.php');
-  
-  // htmlを返す
-  return $file_content;
-}
-
-/* ************************* ファイルの書き込み ************************* */
-function write_html($fpath, $fname, $html){
-  // OUT_PATHの末尾に/を追加
-  if( preg_match("#^[^/\s]+$#", OUT_PATH) ){
-    $out_path=OUT_PATH."/";
-  }else{
-    $out_path='';
-  }
-
-  // ソースのパスを書き込むパスに変更
-  $new_fpath = preg_replace("#^".DATA_PATH."/#", $out_path, $fpath);
-  $new_fpath = ($new_fpath=='' ? './' : $new_fpath);
-
-  // 拡張子の変更(txt -> ?)
-  $new_fname = preg_replace("/.txt$/", '.'.OUT_EXTENSION, $fname);
-  dbg_msg(0, "write", "$new_fname を $new_fpath へ書き込む準備が完了しました.");
-
-  // 重複するファイル,ディレクトリのチェック
-  if( file_exists($new_fpath.$new_fname) && OVER_WRITE==0 ) {
-    dbg_msg(1, "info", "既に $new_fname と同名のファイル,ディレクトリが存在しています. 既に存在するファイルを削除するか移動してください.");
-
-  // 書き込み可能かチェック
-  }else if( !is_writable($new_fpath) ){
-    // ディレクトリが存在(権限不足)
-    if( file_exists($new_path) ) {
-      dbg_msg(1, "info", "$new_fname をディレクトリへ書き込む権限がありません.");
-
-    // ディレクトリが存在しない
-    }else{
-      dbg_msg(0, "info", "$new_fname を書き込むディレクトリ $new_fpath がありません.");
-
-      // ディレクトリ作成に成功
-      if( mkdir($new_fpath, PERMISSION, true) ){
-
-        dbg_msg(0, "info", "$new_fname を書き込むディレクトリ $new_fpath を作成に成功しました.");
-        if( is_writable($new_fpath) ){
-          file_put_contents($new_fpath.$new_fname, $html, LOCK_EX);
-          dbg_msg(0, "info", "$new_fpath$new_fname を書き込みました.");
-          if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$new_fpath$new_fname\"></iframe>";
-        }else{
-          dbg_msg(1, "info", "$new_fpath の権限を確認してください.");
-        }
-
-      // ディレクトリ作成に失敗
-      }else{
-        dbg_msg(1, "info", "$new_fname を書き込むディレクトリ $new_fpath を作成に失敗しました.");
-      }
-    }
-
-  // ファイルの書き込み
-  }else{
-    file_put_contents($new_fpath.$new_fname, $html, LOCK_EX);
-    dbg_msg(0, "info", "$new_fpath$new_fname を書き込みました.");
-    if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$new_fpath$new_fname\"></iframe>";
-  }
-}
-
 /* ************************* 投稿の情報を取得,保持 ************************* */
 function setInfo($fpath, $fname, $number){
   global $pageInfo;
@@ -242,6 +109,76 @@ function setInfo($fpath, $fname, $number){
   }
 }
 
+/* ************************* 書き込むコンテンツを組み立て ************************* */
+function make_html($fpath, $fname, $title, $date, $author, $content){
+  global $pageInfo, $navi, $sub_navi, $uri_top, $naviList;
+
+  // 改行で分割して配列に代入
+  $content = explode("\n", $content);
+  
+  // サブナビの取得
+  $getSubNavi = make_childList($fpath, 'index.txt');
+  $sub_navi = ($fname=='index.txt' ? '' : $getSubNavi);
+
+  // 展開形ナビゲーションの取得
+  $navi2="\n<ul class=\"childList mainNav\">";
+  foreach($naviList as $key => $value){
+    // パスが一致 かつ ファイル名index.txtでない かつ ルートでない
+    if(DATA_PATH."/$key"==$fpath){
+      // ナビゲーションの要素にサブナビを挿入（置換）
+      $navi2.=preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $naviList[$key]);
+    }else{
+      $navi2.=$naviList[$key];
+    }
+  }
+  $navi2.="\n</ul>\n";
+
+  // タグの一覧
+  $checkTags = array('CHILD_LIST', 'SITEMAP', 'UPDATE_LIST');
+
+  // タグ[xxxx]の置換
+  // contentから1行ずつ読み出す
+  foreach($content as &$tmp){
+    $tagState = 0;
+
+    // タグ一覧から1つずつ照合
+    foreach($checkTags as &$foo){
+      $ptn = "/^\s*\[".$foo."\][^\t]*$/";
+      // [xxxx]が存在する時
+      if( preg_match($ptn, $tmp) ){
+        $tagState = 1;
+        // 一致したタグの場合分け
+        switch($foo){
+          case "CHILD_LIST":
+            $after = make_childList($fpath, $fname, 'echoContent');
+            break;
+          case "SITEMAP":
+            $after = "REPLACED[1]";
+            break;
+          case "UPDATE_LIST":
+            $after = make_updateList();
+            break;
+        }
+        // 置換
+        $new_content .= preg_replace($ptn, $after, $tmp);
+
+      }
+    }
+
+    // タグが存在しない時
+    if($tagState==0){
+      $new_content .= "$tmp\n";
+    }
+  }
+  $content = $new_content;
+
+  // htmlテンプレートの読み込み
+  require('template.php');
+  
+  // htmlを返す
+  return $file_content;
+}
+
 /* ************************* 子ページ（カレントディレクトリ内）リストを出力 ************************* */
 function make_childList($filePath, $fileName, $mode){
   global $pageInfo,$navi,$naviList;
@@ -270,7 +207,7 @@ function make_childList($filePath, $fileName, $mode){
         $remove_spaceIndent = preg_replace("/\s+/", '', $pageInfo[$i]['Content']);
 
         // scriptタグとstyleタグを削除
-        $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>|\[[A-Z_]*\])/", '', $remove_spaceIndent);
+        $remove_specialTag = preg_replace("/(<style>.+<\/style>|<script>.+<\/script>|\[[A-Z_]+\])/", '', $remove_spaceIndent);
         $remove_htmlTag = strip_tags($remove_specialTag);
 
         // 最初の50文字を抽出
@@ -297,6 +234,92 @@ function make_childList($filePath, $fileName, $mode){
   }
 
   return $list_html;
+}
+
+/* ************************* サイトマップの生成 ************************* */
+function make_sitemap(){
+  // pageInfoからpathをもとにサイトマップ生成
+}
+
+/* ************************* サイトマップの生成 ************************* */
+function make_updateList(){
+  global $pageInfo;
+
+  // 日付が新しい順に並べ替え
+  $latestPosts = $pageInfo;
+  foreach( $latestPosts as $label => $foo){
+    $bar[$label] = $foo['Date'];
+  }
+  array_multisort($bar, SORT_DESC, $latestPosts);
+
+  // リストの組み立て
+  $result = "<ul class=\"updateList\">";
+  for($i=0;$i<PRINT_UPDATE_POST;$i++){
+    $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $latestPosts[$i]['Path']);
+    $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $latestPosts[$i]['Name']);
+    $uri = $new_path.$new_name;
+    $result .= "<li><span>{$latestPosts[$i]['Date']}</span><a href=\"$uri\">{$latestPosts[$i]['Title']}が更新されました.</a></li>\n";
+  }
+  $result .= "</ul>";
+
+  return $result;
+}
+
+/* ************************* ファイルの書き込み ************************* */
+function write_html($fpath, $fname, $html){
+  // OUT_PATHの末尾に/を追加
+  if( preg_match("#^[^/\s]+$#", OUT_PATH) ){
+    $out_path=OUT_PATH."/";
+  }else{
+    $out_path='';
+  }
+
+  // ソースのパスを書き込むパスに変更
+  $new_fpath = preg_replace("#^".DATA_PATH."/#", $out_path, $fpath);
+  $new_fpath = ($new_fpath=='' ? './' : $new_fpath);
+
+  // 拡張子の変更(txt -> ?)
+  $new_fname = preg_replace("/.txt$/", '.'.OUT_EXTENSION, $fname);
+  dbg_msg(0, "write", "$new_fname を $new_fpath へ書き込む準備が完了しました.");
+
+  // 重複するファイル,ディレクトリのチェック
+  if( file_exists($new_fpath.$new_fname) && OVER_WRITE==0 ) {
+    dbg_msg(1, "info", "既に $new_fname と同名のファイル,ディレクトリが存在しています. 既に存在するファイルを削除するか移動してください.");
+
+  // 書き込み可能かチェック
+  }else if( !is_writable($new_fpath) ){
+    // ディレクトリが存在(権限不足)
+    if( file_exists($new_path) ) {
+      dbg_msg(1, "info", "$new_fname をディレクトリへ書き込む権限がありません.");
+
+    // ディレクトリが存在しない
+    }else{
+      dbg_msg(0, "info", "$new_fname を書き込むディレクトリ $new_fpath がありません.");
+
+      // ディレクトリ作成に成功
+      if( mkdir($new_fpath, PERMISSION, true) ){
+
+        dbg_msg(0, "info", "$new_fname を書き込むディレクトリ $new_fpath を作成に成功しました.");
+        if( is_writable($new_fpath) ){
+          file_put_contents($new_fpath.$new_fname, $html, LOCK_EX);
+          dbg_msg(0, "info", "$new_fpath$new_fname を書き込みました.");
+          if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$new_fpath$new_fname\"></iframe>";
+        }else{
+          dbg_msg(1, "info", "$new_fpath の権限を確認してください.");
+        }
+
+      // ディレクトリ作成に失敗
+      }else{
+        dbg_msg(1, "info", "$new_fname を書き込むディレクトリ $new_fpath を作成に失敗しました.");
+      }
+    }
+
+  // ファイルの書き込み
+  }else{
+    file_put_contents($new_fpath.$new_fname, $html, LOCK_EX);
+    dbg_msg(0, "info", "$new_fpath$new_fname を書き込みました.");
+    if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$new_fpath$new_fname\"></iframe>";
+  }
 }
 
 /* ************************* デバッグメッセージ関数 ************************* */
