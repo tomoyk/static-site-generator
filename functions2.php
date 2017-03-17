@@ -258,7 +258,7 @@ function make_updateList(){
     $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $latestPosts[$i]['Path']);
     $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $latestPosts[$i]['Name']);
     $uri = $new_path.$new_name;
-    $result .= "<li><span>{$latestPosts[$i]['Date']}</span><a href=\"$uri\">{$latestPosts[$i]['Title']}が更新されました.</a></li>\n";
+    $result .= "<li><span>{$latestPosts[$i]['Date']}</span><a href=\"$uri\">{$latestPosts[$i]['Title']}</a>が更新されました.</li>\n";
   }
   $result .= "</ul>";
 

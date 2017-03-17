@@ -45,7 +45,7 @@ http://example.com/hoge/に配置する場合は「hoge/」と指定してくだ
 */
 
 // 新着情報の表示件数
-define('PRINT_UPDATE_POST', 10);
+define('PRINT_UPDATE_POST', 5);
 
 ?>
 <!doctype html>
@@ -111,12 +111,17 @@ require_once("functions2.php");
 // 変数の初期化
 $flag = false;
 $counter = 0; // 一致したファイルの数
-$pageInfo = array();
 $uri_top = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
 
 // 検索の実行
 $result = search(DATA_PATH);
 dbg_msg(0, "info", $result);
+
+// タイトルを降順に並べ替え
+foreach( $pageInfo as $label => $foo){
+  $bar[$label] = $foo['Title'];
+}
+array_multisort($bar, SORT_DESC, $pageInfo);
 
 ?>
 <hr class="marginTop">
