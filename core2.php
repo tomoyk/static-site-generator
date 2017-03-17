@@ -109,7 +109,6 @@ span.blue{
 require_once("functions2.php");
 
 // 変数の初期化
-$flag = false;
 $counter = 0; // 一致したファイルの数
 $uri_top = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
 
@@ -125,7 +124,6 @@ array_multisort($bar, SORT_DESC, $pageInfo);
 
 ?>
 <hr class="marginTop">
-<p><a href="#find">[ファイル(.txt)の探索]</a> <a href="#gen">[ファイル(html)の出力]</a></p>
 <h2 id="gen">$ファイル(html)の出力</h2>
 <?php
 
@@ -145,7 +143,7 @@ for($i=0; $i<count($pageInfo); $i++){
 }
 
 // ここになにか書いてデバッグしてた.
-
+var_dump($hoge);
 ?>
 <hr>
 <p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/14.</p>

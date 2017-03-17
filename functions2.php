@@ -2,7 +2,9 @@
 
 /* ************************* ファイルの探索 ************************* */
 function search($target_path){
-  global $counter,$flag,$pageInfo;
+  global $counter,$pageInfo,$sitemap;
+
+  $sitemap .= "<ul>\n";
 
   // ディレクトリ内のファイル一覧の取得
   $dir_items = array_diff( scandir($target_path) , array('..', '.', 'image') );
@@ -20,23 +22,20 @@ function search($target_path){
       setInfo("$target_path/", $items, $counter);
       dbg_msg(2, "call", "setInfo($target_path/, $items, $counter)");
 
+      $sitemap .= "<li>$target_path/$items</li>\n";
+
       $counter++;
     }
     
     // ディレクトリかつ、ディレクトリ内にファイルが存在する
     if( is_dir("$target_path/$items") && count( scandir("$target_path/$items") )>0 ){
-      // 親(カレント)ディレクトリを検索する
-      if($flag==true){
-        $flag=false;
-        search($items);
-      
       // 子ディレクトリ内を検索する
-      }else{ 
-        search("$target_path/$items");
-      }
+      search("$target_path/$items");
     }
   }
   
+  $sitemap .="</ul>\n";
+
   // 検索結果
   if($counter==0){
     return "ページデータ(.txt)を含むディレクトリ,ファイルが見つかりません.";
@@ -153,7 +152,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
             $after = make_childList($fpath, $fname, 'echoContent');
             break;
           case "SITEMAP":
-            $after = "REPLACED[1]";
+            $after = "[REPLACE]";
             break;
           case "UPDATE_LIST":
             $after = make_updateList();
@@ -237,11 +236,41 @@ function make_childList($filePath, $fileName, $mode){
 }
 
 /* ************************* サイトマップの生成 ************************* */
-function make_sitemap(){
-  // pageInfoからpathをもとにサイトマップ生成
-}
+/*function make_sitemap(){
+  global $pageInfo;
+  
+  // ページをPathについて並べ替え
+  $pages = $pageInfo;
+  foreach( $pages as $label => $foo){
+    $bar[$label] = $foo['Path'];
+  }
+  array_multisort($bar, SORT_ASC, $pages);
 
-/* ************************* サイトマップの生成 ************************* */
+  // リストの組み立て
+  $result = "<ul class=\"sitemap\">\n";
+  for($i=0;$i<count($pages);$i++) {
+    $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
+    $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $pages[$i]['Name']);
+    
+    if($i==0){
+      $result .= $new_path.$new_name."\n<br>";
+
+    }else{
+      $before = preg_replace("#^".DATA_PATH."/#", '', $pages[$i-1]['Path']);
+      $new = preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
+      
+      if($before == $new) {
+        $result .= " > ".$new_path.$new_name."\n<br>";
+      }else{
+        $result .= $new_path.$new_name."\n<br>";
+      }
+    }
+  }
+
+  return $result;
+}*/
+
+/* ************************* 新着情報の生成 ************************* */
 function make_updateList(){
   global $pageInfo;
 
