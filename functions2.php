@@ -2,9 +2,7 @@
 
 /* ************************* ファイルの探索 ************************* */
 function search($target_path){
-  global $counter,$pageInfo,$sitemap;
-
-  $sitemap .= "<ul>\n";
+  global $counter,$pageInfo;
 
   // ディレクトリ内のファイル一覧の取得
   $dir_items = array_diff( scandir($target_path) , array('..', '.', 'image') );
@@ -21,8 +19,6 @@ function search($target_path){
       // ページ情報の取得,格納
       setInfo("$target_path/", $items, $counter);
       dbg_msg(2, "call", "setInfo($target_path/, $items, $counter)");
-
-      $sitemap .= "<li>$target_path/$items</li>\n";
 
       $counter++;
     }
@@ -153,6 +149,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
             break;
           case "SITEMAP":
             $after = "[REPLACE]";
+            $after = make_sitemap();
             break;
           case "UPDATE_LIST":
             $after = make_updateList();
@@ -236,7 +233,7 @@ function make_childList($filePath, $fileName, $mode){
 }
 
 /* ************************* サイトマップの生成 ************************* */
-/*function make_sitemap(){
+function make_sitemap(){
   global $pageInfo;
   
   // ページをPathについて並べ替え
@@ -256,19 +253,25 @@ function make_childList($filePath, $fileName, $mode){
       $result .= $new_path.$new_name."\n<br>";
 
     }else{
+      if($pages[$i]['Name'] == "index.txt"){
+        continue;
+      }
+
       $before = preg_replace("#^".DATA_PATH."/#", '', $pages[$i-1]['Path']);
       $new = preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
       
-      if($before == $new) {
+      if($before == $new && DATA_PATH."/" != $pages[$i]['Path']) {
         $result .= " > ".$new_path.$new_name."\n<br>";
       }else{
+        // ここで吐かれるのは直下とディレクトリの最初のコンテンツだから
+        // 直下とその他の最初で場合分けを実装する
         $result .= $new_path.$new_name."\n<br>";
       }
     }
   }
 
   return $result;
-}*/
+}
 
 /* ************************* 新着情報の生成 ************************* */
 function make_updateList(){
