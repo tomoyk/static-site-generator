@@ -30,8 +30,6 @@ function search($target_path){
     }
   }
   
-  $sitemap .="</ul>\n";
-
   // 検索結果
   if($counter==0){
     return "ページデータ(.txt)を含むディレクトリ,ファイルが見つかりません.";
@@ -248,27 +246,37 @@ function make_sitemap(){
   for($i=0;$i<count($pages);$i++) {
     $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
     $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $pages[$i]['Name']);
+    $uri = $new_path.$new_name;
+    $uri_i = $new_path."index.".OUT_EXTENSION;
     
-    if($i==0){
-      $result .= $new_path.$new_name."\n<br>";
-
-    }else{
-      if($pages[$i]['Name'] == "index.txt"){
-        continue;
-      }
-
-      $before = preg_replace("#^".DATA_PATH."/#", '', $pages[$i-1]['Path']);
-      $new = preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
+    // 今のディレクトリと前のディレクトリを取得
+    $before = preg_replace("#^".DATA_PATH."/#", '', $pages[$i-1]['Path']);
+    $new = preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
       
-      if($before == $new && DATA_PATH."/" != $pages[$i]['Path']) {
-        $result .= " > ".$new_path.$new_name."\n<br>";
-      }else{
-        // ここで吐かれるのは直下とディレクトリの最初のコンテンツだから
-        // 直下とその他の最初で場合分けを実装する
-        $result .= $new_path.$new_name."\n<br>";
+    // 最後が子ディレクトリ
+    if($i==count($pages)-1 && $before!=''){
+      $result .= "</ul>\n";
+
+    // indexファイルは飛ばす(ドキュメントルート直下は例外)
+    }else if($pages[$i]['Name'] == "index.txt" && $pages[$i]['Path'] != DATA_PATH."/"){
+      continue;
+
+    // 前と同じディレクトリ
+    }else if($before == $new){
+      $result .= "<li><a href=\"$uri\">{$pages[$i]['Title']}</a></li>\n";
+
+    // 前と違うディレクトリ
+    }else{
+      // 前のディレクトリがドキュメント直下
+      if($before!=''){
+        $result .= "</ul>\n</li>\n";
       }
+      
+      $result .= "<li><a href=\"$uri_i\">{$pages[$i]['Title']}[こまった]</a></li>\n";
+      $result .= "<ul>\n<li><a href=\"$uri\">{$pages[$i]['Title']}</a></li>\n";
     }
   }
+  $result .= "\n</ul>";
 
   return $result;
 }
