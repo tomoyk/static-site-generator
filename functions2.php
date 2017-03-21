@@ -16,9 +16,11 @@ function search($target_path){
 		// メディアディレクトリ（コピー対象）
 		$rm_dataDir = preg_replace("#^".DATA_PATH."/#", '', $target_path);
 		$dir = explode('/', $rm_dataDir);
-		if( preg_match('/^(image|common)$/', $dir[0]) ){
+		if( preg_match('/^(image|common)$/', $dir[0]) && !is_dir("$target_path/$items") ){
 	    dbg_msg(1, "found", "$target_path/$items"."が見つかりました." );
+
 			// copy
+			copyFile($target_path, $items);
 
     // ファイル(*.txt)の照合
     }else if( preg_match('/^[^\/\s]*.txt$/', $items) ){
@@ -47,6 +49,46 @@ function search($target_path){
   }else{
     return "ページデータ(.txt)を含む $counter 件のディレクトリ,ファイルが見つかりました.";
   }
+}
+
+/* ************************* メディアファイルのコピー ************************* */
+function copyFile($src_fpath, $src_fname){
+  // OUT_PATHの末尾に/を追加
+  if( preg_match("#^[^/\s]{2,}$#", OUT_PATH) ){
+    $replace = OUT_PATH."/";
+  }else{
+    $replace = '';
+  }
+	
+	// 宛先ファイルパスを取得
+	$dest_fpath = preg_replace('#^'.DATA_PATH.'/#', $replace, $src_fpath);
+
+	// 元,宛先ファイルパスの取得
+	$src = $src_fpath."/".$src_fname;
+	$dest = $dest_fpath."/".$src_fname;
+
+	// ファイルの上書き(ファイルかリンクが存在 かつ 上書き設定off）
+	if( (is_file($dest) || is_link($dest)) && OVER_WRITE==0 ){
+		return;
+
+	// ディレクトリの作成
+	}else if( !is_dir($dest_fpath) ){
+  	dbg_msg(0, "info", "ディレクトリ{$dest_fpath}が存在しません.");
+
+		if( mkdir($dest_fpath, PERMISSION, true) ){
+  		dbg_msg(0, "copy", "ディレクトリ{$dest_fpath}を作成に成功しました.");
+		}else{
+  		dbg_msg(1, "copy", "ディレクトリ{$dest_fpath}を作成に失敗しました.");
+			return;
+		}
+	}
+	
+	// コピーの実行
+	if( copy($src, $dest) ){
+  	dbg_msg(0, "copy", "ファイルを{$src}から{$dest}へコピーしました.");
+	}else{
+  	dbg_msg(1, "copy", "ファイルを{$src}から{$dest}へのコピーに失敗しました.");
+	}
 }
 
 /* ************************* 投稿の情報を取得,保持 ************************* */
@@ -322,7 +364,7 @@ function make_updateList(){
 /* ************************* ファイルの書き込み ************************* */
 function write_html($fpath, $fname, $html){
   // OUT_PATHの末尾に/を追加
-  if( preg_match("#^[^/\s]+$#", OUT_PATH) ){
+  if( preg_match("#^[^/\s]{2,}$#", OUT_PATH) ){
     $out_path=OUT_PATH."/";
   }else{
     $out_path='';
