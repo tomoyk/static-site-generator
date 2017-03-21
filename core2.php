@@ -23,6 +23,9 @@ core.phpやfunctions.php, template.phpが設置されているディレクトリ
 子ディレクトリの場合はその名前を設定してください.
 */
 
+// テンプレートファイル名
+define('TEMPLATE_NAME', 'template_ts.php');
+
 // 出力するファイルの拡張子
 define('OUT_EXTENSION', 'php');
 /* [MEMO]

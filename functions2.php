@@ -1,18 +1,27 @@
 <?php
+// Error
+ini_set('display_errors', 'Off');
 
 /* ************************* ファイルの探索 ************************* */
 function search($target_path){
   global $counter,$pageInfo;
 
   // ディレクトリ内のファイル一覧の取得
-  $dir_items = array_diff( scandir($target_path) , array('..', '.', 'image') );
+  $dir_items = array_diff( scandir($target_path) , array('..', '.') );
 
   // ディレクトリ内の探索ループ
   foreach($dir_items as $items){
     dbg_msg(2, "finding", "${target_path}/${items} をチェックしています...");
-  
-    // 文字列が一致しているかチェック
-    if( preg_match('/^[^\/\s]*.txt$/', $items) ){
+
+		// メディアディレクトリ（コピー対象）
+		$rm_dataDir = preg_replace("#^".DATA_PATH."/#", '', $target_path);
+		$dir = explode('/', $rm_dataDir);
+		if( preg_match('/^(image|common)$/', $dir[0]) ){
+	    dbg_msg(1, "found", "$target_path/$items"."が見つかりました." );
+			// copy
+
+    // ファイル(*.txt)の照合
+    }else if( preg_match('/^[^\/\s]*.txt$/', $items) ){
       dbg_msg(0, "found", "$target_path/$items"."が見つかりました." );
       if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$target_path/$items\"></iframe>";
       
@@ -20,8 +29,10 @@ function search($target_path){
       setInfo("$target_path/", $items, $counter);
       dbg_msg(2, "call", "setInfo($target_path/, $items, $counter)");
 
+			// カウンタ増加
       $counter++;
-    }
+
+		}
     
     // ディレクトリかつ、ディレクトリ内にファイルが存在する
     if( is_dir("$target_path/$items") && count( scandir("$target_path/$items") )>0 ){
@@ -167,7 +178,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   $content = $new_content;
 
   // htmlテンプレートの読み込み
-  require('template.php');
+  require(TEMPLATE_NAME);
   
   // htmlを返す
   return $file_content;
@@ -271,8 +282,11 @@ function make_sitemap(){
       if($before!=''){
         $result .= "</ul>\n</li>\n";
       }
+
+			// indexの含まれる配列の要素の添字を取得
+			for($j=$i;$pages[$j]['Name']!="index.txt";$j++);
       
-      $result .= "<li><a href=\"$uri_i\">{$pages[$i]['Title']}[こまった]</a></li>\n";
+      $result .= "<li><a href=\"$uri_i\">{$pages[$j]['Title']}</a></li>\n";
       $result .= "<ul>\n<li><a href=\"$uri\">{$pages[$i]['Title']}</a></li>\n";
     }
   }
