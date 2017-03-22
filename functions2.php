@@ -13,13 +13,15 @@ function search($target_path){
   foreach($dir_items as $items){
     dbg_msg(2, "finding", "${target_path}/${items} をチェックしています...");
 
-    // メディアディレクトリ（コピー対象）
+    // ドキュメントルート直下のディレクトリを取得（データディレクトリを除く）
     $rm_dataDir = preg_replace("#^".DATA_PATH."/#", '', $target_path);
     $dir = explode('/', $rm_dataDir);
-    if( preg_match('/^(image|common)$/', $dir[0]) && !is_dir("$target_path/$items") ){
-      dbg_msg(1, "found", "$target_path/$items"."が見つかりました." );
 
-      // copy
+    // ドキュメントルート直下のメディアディレクトリであるか
+    define('DATA_DIR', 'image|common');
+    if( preg_match('/^('.DATA_DIR.')$/', $dir[0]) && !is_dir("$target_path/$items") ){
+			// ファイルのコピー
+      dbg_msg(0, "found", "$target_path/$items"."が見つかりました." );
       copyFile($target_path, $items);
 
     // ファイル(*.txt)の照合
@@ -180,7 +182,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   $navi2.="\n</ul>\n";
 
   // タグの一覧
-  $checkTags = array('CHILD_LIST', 'SITEMAP', 'UPDATE_LIST');
+  $checkTags = array('CHILD_LIST', 'SITEMAP', 'UPDATE_LIST', 'BASE_URI');
 
   // タグ[xxxx]の置換
   // contentから1行ずつ読み出す
@@ -189,7 +191,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
     // タグ一覧から1つずつ照合
     foreach($checkTags as &$foo){
-      $ptn = "/^\s*\[".$foo."\][^\t]*$/";
+      $ptn = "/\[".$foo."\]/";
       // [xxxx]が存在する時
       if( preg_match($ptn, $tmp) ){
         $tagState = 1;
@@ -199,11 +201,13 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
             $after = make_childList($fpath, $fname, 'echoContent');
             break;
           case "SITEMAP":
-            $after = "[REPLACE]";
             $after = make_sitemap();
             break;
           case "UPDATE_LIST":
             $after = make_updateList();
+            break;
+          case "BASE_URI":
+            $after = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
             break;
         }
         // 置換
