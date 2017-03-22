@@ -112,7 +112,7 @@ require_once("functions2.php");
 
 // 変数の初期化
 $counter = 0; // 一致したファイルの数
-$uri_top = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
+$uri_base = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
 
 // 検索の実行
 $result = search(DATA_PATH);

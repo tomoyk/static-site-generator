@@ -17,15 +17,15 @@ function search($target_path){
     $rm_dataDir = preg_replace("#^".DATA_PATH."/#", '', $target_path);
     $dir = explode('/', $rm_dataDir);
 
-    // ドキュメントルート直下のメディアディレクトリであるか
+    // ドキュメントルート直下のメディアディレクトリであるか かつ .（ドット）から始まるファイル名でない
     define('DATA_DIR', 'image|common');
-    if( preg_match('/^('.DATA_DIR.')$/', $dir[0]) && !is_dir("$target_path/$items") ){
+    if( preg_match('/^('.DATA_DIR.')$/', $dir[0]) && !is_dir("$target_path/$items") && !preg_match("/^\..+$/", $items) ){
 			// ファイルのコピー
       dbg_msg(0, "found", "$target_path/$items"."が見つかりました." );
       copyFile($target_path, $items);
 
-    // ファイル(*.txt)の照合
-    }else if( preg_match('/^[^\/\s]*.txt$/', $items) ){
+    // ファイルの拡張子がtxt かつ .（ドット）から始まるファイル名でない
+    }else if( preg_match('/^[^\/\s.]{1}[^\/\s]*.txt$/', $items) ){
       dbg_msg(0, "found", "$target_path/$items"."が見つかりました." );
       if(DEBUG==1) echo "\n<iframe class=\"pageContent\" src=\"$target_path/$items\"></iframe>";
       
@@ -159,7 +159,7 @@ function setInfo($fpath, $fname, $number){
 
 /* ************************* 書き込むコンテンツを組み立て ************************* */
 function make_html($fpath, $fname, $title, $date, $author, $content){
-  global $pageInfo, $navi, $sub_navi, $uri_top, $naviList;
+  global $pageInfo, $navi, $sub_navi, $uri_top, $naviList, $uri_base;
 
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
