@@ -145,8 +145,9 @@ for($i=0; $i<count($pageInfo); $i++){
 }
 
 // ここになにか書いてデバッグしてた.
-var_dump($hoge);
+
 ?>
 <hr>
-<p>Author: Tomoyuki Koyama, License: MIT License, Latest-Update: 2017/03/14.</p>
+<p>static-site-generator | Tomoyuki Koyama | github.com/tomoyk/static-site-generator</p>
+<hr>
 </body></html>
