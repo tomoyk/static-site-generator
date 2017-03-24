@@ -167,6 +167,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   // サブナビの取得
   $getSubNavi = make_childList($fpath, 'index.txt');
   $sub_navi = ($fname=='index.txt' ? '' : $getSubNavi);
+  // data-pathを取り除いてドキュメントルートのディレクトリ下にあるとき
 
   // 展開形ナビゲーションの取得
   $navi2="\n<ul class=\"childList mainNav\">";
@@ -332,7 +333,7 @@ function make_sitemap(){
       // indexの含まれる配列の要素の添字を取得
       for($j=$i;$pages[$j]['Name']!="index.txt";$j++);
       
-      $result .= "<li><a href=\"$uri_i\">{$pages[$j]['Title']}</a></li>\n";
+      $result .= "<li><a href=\"$uri_i\">{$pages[$j]['Title']}</a>\n";
       $result .= "<ul>\n<li><a href=\"$uri\">{$pages[$i]['Title']}</a></li>\n";
     }
   }
