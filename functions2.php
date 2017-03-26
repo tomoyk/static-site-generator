@@ -179,8 +179,8 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
       // ナビゲーションの要素にサブナビを挿入（置換）
       $navi2 .= preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $tmp);
 
-    // key(添字)が拡張子txt かつ データパスがドキュメントルート直下
-    } else if(preg_match("#[^/ ]+.txt$#", $key) && DATA_PATH."/"==$fpath) {
+    // key(添字)が拡張子txt かつ ファイル名と添字が一致
+    } else if(preg_match("#[^/ ]+.txt$#", $key) && $fname==$key) {
       // ドキュメントルート直下のページ
       $navi2 .= preg_replace("#<li>#", "<li class=\"selected\">", $naviList[$key]);
 
