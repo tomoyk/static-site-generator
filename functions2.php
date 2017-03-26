@@ -169,16 +169,22 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   $sub_navi = ($fname=='index.txt'||$fpath==DATA_PATH."/" ? '' : $getSubNavi);
 
   // 展開形ナビゲーションの取得
-  $navi2="\n<ul class=\"childList mainNav\">";
+  $navi2 = "\n<ul class=\"childList mainNav\">";
   // 配列の添字を比較
   foreach($naviList as $key => $value){
     // パスが一致 かつ ファイル名index.txtでない かつ ルートでない
-    if(DATA_PATH."/$key"==$fpath){
+    if(DATA_PATH."/$key"==$fpath) {
       // クラスを付与
-      $tmp=preg_replace("#<li>#", "<li class=\"selected\">", $naviList[$key]);
+      $tmp = preg_replace("#<li>#", "<li class=\"selected\">", $naviList[$key]);
       // ナビゲーションの要素にサブナビを挿入（置換）
-      $navi2.=preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $tmp);
-    }else{
+      $navi2 .= preg_replace("#</a>\n</li>$#", "</a>$getSubNavi</li>", $tmp);
+
+    // key(添字)が拡張子txt かつ データパスがドキュメントルート直下
+    } else if(preg_match("#[^/ ]+.txt$#", $key) && DATA_PATH."/"==$fpath) {
+      // ドキュメントルート直下のページ
+      $navi2 .= preg_replace("#<li>#", "<li class=\"selected\">", $naviList[$key]);
+
+    } else {
       $navi2.=$naviList[$key];
     }
   }
