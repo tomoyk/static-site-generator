@@ -216,7 +216,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
             $after = make_updateList();
             break;
           case "BASE_URI":
-            $after = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
+            $after = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT;
             break;
         }
         // 置換
@@ -256,7 +256,7 @@ function make_childList($filePath, $fileName, $mode){
       dbg_msg(2, "info", "次の条件で一致しました. $filePath ==? {$pageInfo[$i]['Path']} , $fileName ==? {$pageInfo[$i]['Name']}");
 
       // ソースのパスを書き込むパスに変更
-      $new_fpath = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
+      $new_fpath = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pageInfo[$i]['Path']);
 
       // txtをhtmlに変換
       $new_fname = preg_replace("/.txt$/", '.'.OUT_EXTENSION, $pageInfo[$i]['Name']);
@@ -310,7 +310,7 @@ function make_sitemap(){
   // リストの組み立て
   $result = "<ul class=\"sitemap\">\n";
   for($i=0;$i<count($pages);$i++) {
-    $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
+    $new_path = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $pages[$i]['Path']);
     $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $pages[$i]['Name']);
     $uri = $new_path.$new_name;
     $uri_i = $new_path."index.".OUT_EXTENSION;
@@ -364,7 +364,7 @@ function make_updateList(){
   // リストの組み立て
   $result = "<ul class=\"updateList\">";
   for($i=0;$i<PRINT_UPDATE_POST;$i++){
-    $new_path = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $latestPosts[$i]['Path']);
+    $new_path = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT.preg_replace("#^".DATA_PATH."/#", '', $latestPosts[$i]['Path']);
     $new_name = preg_replace("/.txt$/", ".".OUT_EXTENSION, $latestPosts[$i]['Name']);
     $uri = $new_path.$new_name;
     $result .= "<li><span>{$latestPosts[$i]['Date']}</span><a href=\"$uri\">{$latestPosts[$i]['Title']}</a>が更新されました.</li>\n";

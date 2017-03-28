@@ -39,6 +39,13 @@ define('PERMISSION', 0755);
 0700に設定してapacheの実行ユーザのみ読み書きを許可するほうがより安全です.
 */
 
+// 公開サイトのホスト名
+define('HTTP_HOST', 'localhost');
+/* [MEMO]
+ローカルホストの設置する場合は, localhost
+example.comに設置する場合は，example.com
+*/
+
 // 公開サイトの配置ディレクトリ設定
 define('DOCUMENT_ROOT', 'ts/static-site-generator/out/');
 /* [MEMO]
@@ -112,7 +119,7 @@ require_once("functions2.php");
 
 // 変数の初期化
 $counter = 0; // 一致したファイルの数
-$uri_base = 'http://'.$_SERVER["HTTP_HOST"].'/'.DOCUMENT_ROOT;
+$uri_base = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT;
 
 // 検索の実行
 $result = search(DATA_PATH);
