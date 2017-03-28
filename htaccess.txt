@@ -1,9 +1,12 @@
 # IP制限かBasic認証をしてください.
 AuthUserFile /var/www/.htpasswd
 AuthGroupFile /dev/null
-AuthName "Please enter username and password"
+AuthName "Please input your username and password."
 AuthType Basic
 
 <Files ~ "^(core2\.php|functions2\.php|template_ts\.php)$">
 require valid-user
 </Files>
+
+AddHandler cgi-script htpasswd
+
