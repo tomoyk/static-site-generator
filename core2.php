@@ -22,6 +22,9 @@ core.phpやfunctions.php, template.phpが設置されているディレクトリ
 同一ディレクトリの場合は「.」を設定,子ディレクトリの場合はその名前を設定してください.
 */
 
+// TLS対応設定
+define('SSL', 0);
+
 // テンプレートファイル名
 define('TEMPLATE_NAME', 'template_ts.php');
 
@@ -119,7 +122,7 @@ require_once("functions2.php");
 
 // 変数の初期化
 $counter = 0; // 一致したファイルの数
-$uri_base = 'http://'.HTTP_HOST.'/'.DOCUMENT_ROOT;
+$uri_base = (SSL ? 'https://' : 'http://').HTTP_HOST.'/'.DOCUMENT_ROOT;
 
 // 検索の実行
 $result = search(DATA_PATH);
