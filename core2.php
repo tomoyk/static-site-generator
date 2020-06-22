@@ -1,13 +1,16 @@
 <?php
 
+set_time_limit(30);
+ini_set('display_errors', 'On');
+
 // デバッグ設定(0:OFF, 1:ON)
-define('DEBUG', 0);
+define('DEBUG', 1);
 
 // 上書き設定(0:NO, 1:YES)
 define('OVER_WRITE', 1);
 
 // ソースデータ(.txt)の保存場所
-define('DATA_PATH', 'src');
+define('DATA_PATH', 'dosokai_src');
 /* [MEMO]
 core.phpやfunctions.php, template.phpが設置されているディレクトリを基準に
 サイトのソースデータ(.txt)が保存されているディレクトリ名を指定してください.
@@ -15,7 +18,7 @@ core.phpやfunctions.php, template.phpが設置されているディレクトリ
 */
 
 // 生成したサイトの保存場所
-define('OUT_PATH', 'out');
+define('OUT_PATH', 'dosokai_out');
 /* [MEMO]
 生成したサイト(html)の出力先のディレクトリを指定してください.
 core.phpやfunctions.php, template.phpが設置されているディレクトリを基準に
@@ -23,7 +26,7 @@ core.phpやfunctions.php, template.phpが設置されているディレクトリ
 */
 
 // TLS対応設定
-define('SSL', 0);
+define('SSL', 1);
 
 // テンプレートファイル名
 define('TEMPLATE_NAME', 'template_ts.php');
@@ -43,14 +46,14 @@ define('PERMISSION', 0755);
 */
 
 // 公開サイトのホスト名
-define('HTTP_HOST', 'localhost');
+define('HTTP_HOST', 'example.jp');
 /* [MEMO]
 ローカルホストの設置する場合は, localhost
 example.comに設置する場合は，example.com
 */
 
 // 公開サイトの配置ディレクトリ設定
-define('DOCUMENT_ROOT', 'ts/static-site-generator/out/');
+define('DOCUMENT_ROOT', '');
 /* [MEMO]
 http://example.com/に配置する場合は「空白」（スペースではありません）を指定してください.
 http://example.com/hoge/に配置する場合は「hoge/」と指定してください.
@@ -143,7 +146,6 @@ array_multisort($bar, SORT_DESC, $pageInfo);
 $naviList = array();
 make_childList(DATA_PATH.'/', 'index.txt', 'Navi');
 
-// htmlの生成
 for($i=0; $i<count($pageInfo); $i++){
   // htmlの組み立て
   $write_content = make_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $pageInfo[$i]['Title'], $pageInfo[$i]['Date'], $pageInfo[$i]['Author'], $pageInfo[$i]['Content']);
@@ -152,6 +154,7 @@ for($i=0; $i<count($pageInfo); $i++){
   // htmlの書き込み
   write_html($pageInfo[$i]['Path'], $pageInfo[$i]['Name'], $write_content);
   dbg_msg(2, "call", "write_html({$pageInfo[$i]['Path']}, {$pageInfo[$i]['Name']}, \$write_content)"); // Content展開すると大変だから展開しない
+
 }
 
 // ここになにか書いてデバッグしてた.

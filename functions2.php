@@ -1,6 +1,7 @@
 <?php
-// Error
-ini_set('display_errors', 'Off');
+
+set_time_limit(30);
+ini_set('display_errors', 'On');
 
 /* ************************* ファイルの探索 ************************* */
 function search($target_path){
@@ -164,8 +165,13 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
   // 改行で分割して配列に代入
   $content = explode("\n", $content);
   
+  // print_r($content);
+  // echo "BEGIN DUMP";
+  // var_dump($content);
+  // echo "END DUMP";
+
   // サブナビの取得
-  $getSubNavi = make_childList($fpath, 'index.txt');
+  $getSubNavi = make_childList($fpath, 'index.txt', '');
   $sub_navi = ($fname=='index.txt'||$fpath==DATA_PATH."/" ? '' : $getSubNavi);
 
   // 展開形ナビゲーションの取得
@@ -234,7 +240,7 @@ function make_html($fpath, $fname, $title, $date, $author, $content){
 
   // htmlテンプレートの読み込み
   require(TEMPLATE_NAME);
-  
+
   // htmlを返す
   return $file_content;
 }
